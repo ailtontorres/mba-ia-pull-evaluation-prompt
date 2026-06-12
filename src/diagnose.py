@@ -26,7 +26,7 @@ def main():
         print("❌ USERNAME_LANGSMITH_HUB não configurado")
         return 1
 
-    prompt_name = f"{username}/bug_to_user_story_v2"
+    prompt_name = f"{username}/bug_to_user_story_v3"
     print(f"📥 Puxando prompt: {prompt_name}")
     template = hub.pull(prompt_name)
 

@@ -12,7 +12,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from utils import validate_prompt_structure
 
-PROMPT_V2_PATH = Path(__file__).parent.parent / "prompts" / "bug_to_user_story_v2.yml"
+PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "bug_to_user_story_v3.yml"
+PROMPT_KEY = "bug_to_user_story_v3"
 
 
 def load_prompts(file_path: str):
@@ -24,18 +25,18 @@ def load_prompts(file_path: str):
 @pytest.fixture(scope="module")
 def prompt_data():
     """
-    Carrega os dados do prompt v2.
+    Carrega os dados do prompt v3.
 
     O YAML pode estar no formato:
     a) Direto: { description: ..., system_prompt: ..., ... }
-    b) Aninhado: { bug_to_user_story_v2: { description: ..., system_prompt: ..., ... } }
+    b) Aninhado: { bug_to_user_story_v3: { description: ..., system_prompt: ..., ... } }
     """
-    raw = load_prompts(str(PROMPT_V2_PATH))
-    assert raw is not None, f"Arquivo de prompt não pôde ser carregado: {PROMPT_V2_PATH}"
+    raw = load_prompts(str(PROMPT_PATH))
+    assert raw is not None, f"Arquivo de prompt não pôde ser carregado: {PROMPT_PATH}"
 
-    # Se a chave 'bug_to_user_story_v2' existir, desce um nível
-    if isinstance(raw, dict) and "bug_to_user_story_v2" in raw:
-        return raw["bug_to_user_story_v2"]
+    # Se a chave do prompt existir, desce um nível
+    if isinstance(raw, dict) and PROMPT_KEY in raw:
+        return raw[PROMPT_KEY]
     return raw
 
 

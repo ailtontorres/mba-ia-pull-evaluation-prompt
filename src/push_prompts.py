@@ -2,7 +2,7 @@
 Script para fazer push de prompts otimizados ao LangSmith Prompt Hub.
 
 Este script:
-1. Lê os prompts otimizados de prompts/bug_to_user_story_v2.yml
+1. Lê os prompts otimizados de prompts/bug_to_user_story_v3.yml
 2. Valida os prompts
 3. Faz push PÚBLICO para o LangSmith Hub
 4. Adiciona metadados (tags, descrição, técnicas utilizadas)
@@ -19,7 +19,8 @@ from utils import load_yaml, check_env_vars, print_section_header
 
 load_dotenv()
 
-PROMPT_V2_PATH = "prompts/bug_to_user_story_v2.yml"
+PROMPT_PATH = "prompts/bug_to_user_story_v3.yml"
+PROMPT_KEY = "bug_to_user_story_v3"
 
 
 def validate_prompt(prompt_data: dict) -> tuple[bool, list]:
@@ -72,7 +73,7 @@ def build_readme(prompt_data: dict) -> str:
     techniques = prompt_data.get("techniques_applied", [])
     techniques_md = "\n".join(f"- {t}" for t in techniques)
 
-    return f"""# Bug to User Story v2
+    return f"""# Bug to User Story {prompt_data.get("version", "v3")}
 
 {prompt_data.get("description", "")}
 
@@ -91,7 +92,7 @@ bugs complexos geram histórias com seções `=== USER STORY PRINCIPAL ===`,
 
 ## Versão
 
-{prompt_data.get("version", "v2")}
+{prompt_data.get("version", "v3")}
 """
 
 
@@ -116,7 +117,7 @@ def push_prompt_to_langsmith(prompt_name: str, prompt_data: dict) -> bool:
     description = prompt_data.get("description", "")
     full_description = (
         f"{description} | Técnicas: {', '.join(techniques)} | "
-        f"Versão: {prompt_data.get('version', 'v2')}"
+        f"Versão: {prompt_data.get('version', 'v3')}"
     )
     readme = build_readme(prompt_data)
     tags = prompt_data.get("tags", []) or []
@@ -158,13 +159,13 @@ def main():
         print("❌ USERNAME_LANGSMITH_HUB está vazio no .env")
         return 1
 
-    raw = load_yaml(PROMPT_V2_PATH)
+    raw = load_yaml(PROMPT_PATH)
     if raw is None:
-        print(f"❌ Não foi possível carregar {PROMPT_V2_PATH}")
+        print(f"❌ Não foi possível carregar {PROMPT_PATH}")
         return 1
 
-    if "bug_to_user_story_v2" in raw:
-        prompt_data = raw["bug_to_user_story_v2"]
+    if PROMPT_KEY in raw:
+        prompt_data = raw[PROMPT_KEY]
     else:
         prompt_data = raw
 
@@ -178,12 +179,12 @@ def main():
     print("✓ Prompt validado com sucesso")
     print(f"   Técnicas aplicadas: {', '.join(prompt_data.get('techniques_applied', []))}")
 
-    prompt_name = f"{username}/bug_to_user_story_v2"
+    prompt_name = f"{username}/{PROMPT_KEY}"
     success = push_prompt_to_langsmith(prompt_name, prompt_data)
 
     if success:
         print(f"\n✅ Push concluído!")
-        print(f"   Prompt disponível em: https://smith.langchain.com/hub/{username}/bug_to_user_story_v2")
+        print(f"   Prompt disponível em: https://smith.langchain.com/hub/{username}/{PROMPT_KEY}")
         print(f"   Próximo passo: rodar 'python src/evaluate.py'")
         return 0
     else:
